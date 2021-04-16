@@ -4,3 +4,7 @@
     box-sizing: border-box;
 }
 
+main{
+    min-height: 100vh;
+    background: linear-gradient(to right top, #a434eb, #3734eb);
+}

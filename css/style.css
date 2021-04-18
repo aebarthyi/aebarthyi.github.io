@@ -1,0 +1,86 @@
+
+*{
+    font-family: monospace;
+}
+
+body{
+    display: flex;
+    background-color: #282828;
+    justify-content: center;
+}
+
+body p{ 
+    color: beige;
+}
+
+.header{
+    color: beige;
+    text-align: center;
+}
+
+.introduction{
+    text-align: center;
+}
+
+.projects{
+    display: flex;
+    color: beige;
+    text-align: center;
+}
+
+.keyboards{
+    align-self: center;
+    width: 100%;
+    height: 100vh;
+    background-color:gray;
+    border-radius: 2rem;
+    box-shadow: 10px 10px 5px dimgrey;
+}
+
+.keyboards h1{
+    font-family: monospace;
+    text-align: center;
+    color: darkslateblue;
+}
+
+.topnav {
+    display: flex;
+    justify-content: center;
+}
+  
+.topnav-left a {
+    flex: 1;
+    color:darkturquoise;
+    text-align: center;
+    margin: 14px 16px;
+    text-decoration: none;
+}
+  
+.topnav-left a:hover {
+    color:aqua;
+}
+  
+.topnav-centered a {
+    flex: 1;
+    color:darkturquoise;
+    text-align: center;
+    margin: 14px 16px;
+    text-decoration: none;
+}
+
+.topnav-centered a:hover {
+    color:aqua;
+}
+  
+.topnav-right a{
+    flex: 1;
+    color:darkturquoise;
+    text-align: center;
+    margin: 14px 16px;
+    text-decoration: none;
+}
+
+.topnav-right a:hover {
+    color:aqua;
+}
+

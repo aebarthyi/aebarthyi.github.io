@@ -28,21 +28,6 @@ body p{
     text-align: center;
 }
 
-.keyboards{
-    align-self: center;
-    width: 100%;
-    height: 100vh;
-    background-color:gray;
-    border-radius: 2rem;
-    box-shadow: 10px 10px 5px dimgrey;
-}
-
-.keyboards h1{
-    font-family: monospace;
-    text-align: center;
-    color: darkslateblue;
-}
-
 .topnav {
     display: flex;
     justify-content: center;
@@ -69,6 +54,18 @@ body p{
 }
 
 .topnav-centered a:hover {
+    color:aqua;
+}
+
+.topnav-centered-right a {
+    flex: 1;
+    color:darkturquoise;
+    text-align: center;
+    margin: 14px 16px;
+    text-decoration: none;
+}
+
+.topnav-centered-right a:hover {
     color:aqua;
 }
   

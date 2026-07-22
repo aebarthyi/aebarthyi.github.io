@@ -25,12 +25,12 @@
     rotateMs: 15000,            // ms before each plane advances to the next design
     fadeMs: 360,
     vdrift: 0.045,              // vertical drift rate when a design is taller than the viewport
-    showHud: true,
+    showHud: false,
     // three planes, evenly spaced in depth
     layers: [
-      { cls: 'far',  speed: 0.38, scale: 0.60, anchor: 'top',    bleed: 0.13, delay: 2,
-        unlit: '#08210f', lit: '#20703e', label: '#1a5232', opacity: 0.60, blur: 0.70 },
-      { cls: 'mid',  speed: 0.69, scale: 0.80, anchor: 'bottom', bleed: 0.12, delay: 1,
+      { cls: 'far',  speed: 0.38, scale: 0.70, anchor: 'top',    bleed: 0.13, delay: 2,
+        unlit: '#08210f', lit: '#20703e', label: '#1a5232', opacity: 0.60, blur: 0.65 },
+      { cls: 'mid',  speed: 0.69, scale: 0.85, anchor: 'bottom', bleed: 0.12, delay: 1,
         unlit: '#0d3017', lit: '#36b762', label: '#24703f', opacity: 0.80, blur: 0.40 },
       { cls: 'fore', speed: 1.00, scale: 1.00, anchor: 'center', yBias: 0.00, delay: 0,
         unlit: '#12401f', lit: '#4dff86', label: '#2f8f4d', opacity: 1.00, blur: 0 }

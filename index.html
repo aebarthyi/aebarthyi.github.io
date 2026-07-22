@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Circuit Background — demo</title>
+<title>Andrew's Site</title>
 
 <link rel="stylesheet" href="circuit-background.css">
 <style>
@@ -16,20 +16,180 @@
     color: #cfeee6;
   }
   .cbg-content { height: 100%; display: grid; place-items: center; padding: 6vw; }
-  .card { text-align: center; }
-  .card h1 {
-    font-size: clamp(2rem, 7vw, 4.5rem);
-    font-weight: 600;
-    letter-spacing: .06em;
-    color: #ffffff;
-    text-shadow: 0 0 30px rgba(2, 20, 6, .95);
+
+  /* --- IRIX 4Dwm window --- */
+  .window {
+    --frame: 9px;    /* frame thickness */
+    --grip: 30px;    /* distance from each corner to the notch */
+    position: relative;
+    background: #8f958f;
+    padding: var(--frame);
+    outline: 1px solid #000;
+    box-shadow:
+      inset 2px 2px 0 #d7dcd7,     /* raised frame highlight (top-left) */
+      inset -2px -2px 0 #3c403c,   /* raised frame shadow (bottom-right) */
+      4px 6px 22px rgba(0, 0, 0, .55);
+    max-width: min(92vw, 640px);
   }
-  .card p {
-    margin-top: 1.1rem;
-    font-size: clamp(.75rem, 1.6vw, .95rem);
-    letter-spacing: .34em;
-    text-transform: uppercase;
-    color: #fafafa;
+  /* 8 chiseled notches breaking the frame into corner grips + edge handles */
+  .window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-image:
+      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* top, near left  */
+      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* top, near right */
+      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* bottom, near left  */
+      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* bottom, near right */
+      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* left, near top    */
+      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* left, near bottom */
+      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* right, near top    */
+      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%);  /* right, near bottom */
+    background-size:
+      2px var(--frame), 2px var(--frame), 2px var(--frame), 2px var(--frame),
+      var(--frame) 2px, var(--frame) 2px, var(--frame) 2px, var(--frame) 2px;
+    background-position:
+      var(--grip) 0,               calc(100% - var(--grip)) 0,
+      var(--grip) 100%,            calc(100% - var(--grip)) 100%,
+      0 var(--grip),               0 calc(100% - var(--grip)),
+      100% var(--grip),            100% calc(100% - var(--grip));
+  }
+  /* inner bevel steps back down -> frame reads as a raised ridge/groove */
+  .window::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--frame) - 2px);
+    border: 2px solid;
+    border-top-color: #3c403c;
+    border-left-color: #3c403c;
+    border-right-color: #eef2f5;
+    border-bottom-color: #eef2f5;
+    pointer-events: none;
+  }
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .4rem;
+    /* smooth Indigo Magic shading rather than a flat fill */
+    background: linear-gradient(180deg, #aab2b8 0%, #9aa2a8 45%, #868e94 100%);
+    border-style: solid;
+    border-width: 2px;
+    border-top-color: #eef2f5;
+    border-left-color: #eef2f5;
+    border-right-color: #40474d;
+    border-bottom-color: #40474d;
+  }
+  .titlebar .title {
+    flex: 1;
+    text-align: left;
+    padding-left: .3rem;
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(.72rem, 1.5vw, .9rem);
+    color: #0c0c0c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* small beveled 4Dwm window-control buttons */
+  .win-btn {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, #b0b8be 0%, #9aa2a8 50%, #848c92 100%);
+    border-style: solid;
+    border-width: 2px;
+    border-top-color: #eef2f5;
+    border-left-color: #eef2f5;
+    border-right-color: #40474d;
+    border-bottom-color: #40474d;
+    outline: 1px solid #000;
+    position: relative;
+  }
+  .win-btn::before {
+    content: "";
+    position: absolute;
+    background: #1c1c1c;
+  }
+  /* window-menu button: horizontal pulldown bar */
+  .win-menu::before   { inset: 42% 20% auto 20%; height: 3px; }
+  /* iconify: a distinctly small filled square, low-center */
+  .win-min::before    { width: 30%; height: 30%; inset: auto auto 26% 50%; transform: translateX(-50%); }
+  /* maximize: a large hollow square outline */
+  .win-max::before    { inset: 22% 22% 22% 22%; background: transparent; border: 2px solid #1c1c1c; }
+
+  .window-body {
+    padding: clamp(1.6rem, 5vw, 3rem) clamp(1.4rem, 5vw, 3rem) clamp(1.4rem, 4vw, 2.4rem);
+    text-align: center;
+  }
+  .window-body h1 {
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;                 /* signature IRIX italic */
+    font-weight: 700;
+    font-size: clamp(1.8rem, 6vw, 3.4rem);
+    letter-spacing: .01em;
+    color: #131513;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35),
+                 0 -1px 0 rgba(0, 0, 0, .25);
+  }
+  /* IRIX Indigo Magic beveled panel holding the buttons */
+  .nav {
+    margin-top: 1.8rem;
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .6rem;
+    padding: .7rem;
+    background: linear-gradient(180deg, #989e98 0%, #8f958f 55%, #7f857f 100%);
+    border-style: solid;
+    border-width: 2px;
+    border-top-color: #d7dcd7;
+    border-left-color: #d7dcd7;
+    border-right-color: #3c403c;
+    border-bottom-color: #3c403c;
+    outline: 1px solid #000;
+  }
+  .nav a {
+    display: inline-block;
+    padding: .45rem 1.3rem;
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;                 /* signature IRIX italic labels */
+    font-weight: 700;
+    font-size: clamp(.72rem, 1.4vw, .88rem);
+    letter-spacing: .01em;
+    text-decoration: none;
+    color: #0c0c0c;
+    /* SGI blue-gray scheme with a double (chiseled) raised bevel */
+    background: linear-gradient(180deg, #aeb6bc 0%, #9aa2a8 50%, #868e94 100%);
+    border-style: solid;
+    border-width: 2px;
+    border-top-color: #eef2f5;
+    border-left-color: #eef2f5;
+    border-right-color: #40474d;
+    border-bottom-color: #40474d;
+    border-radius: 0;
+    outline: 1px solid #000;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .35),
+                inset -1px -1px 0 rgba(0, 0, 0, .35);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .3);
+  }
+  .nav a:hover {
+    background: linear-gradient(180deg, #bcc4ca 0%, #a8b0b6 50%, #949ca2 100%);
+  }
+  .nav a:active {
+    /* sunken chiseled bevel when pressed */
+    background: linear-gradient(180deg, #7c848a 0%, #868e94 50%, #969ea4 100%);
+    border-top-color: #40474d;
+    border-left-color: #40474d;
+    border-right-color: #eef2f5;
+    border-bottom-color: #eef2f5;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .35),
+                inset -1px -1px 0 rgba(255, 255, 255, .35);
   }
 </style>
 </head>
@@ -40,9 +200,22 @@
   <!-- Your content. The .cbg-content class just sets position:relative; z-index:1
        so it sits above the background. -->
   <main class="cbg-content">
-    <div class="card">
-      <h1>Andrew</h1>
-      <p>replace with your content</p>
+    <div class="window">
+      <div class="titlebar">
+        <span class="win-btn win-menu"></span>
+        <span class="title">andrew@indigo:~</span>
+        <span class="win-btn win-min"></span>
+        <span class="win-btn win-max"></span>
+      </div>
+      <div class="window-body">
+        <h1>Andrew Barth-Yi</h1>
+        <nav class="nav">
+          <a href="/about">About</a>
+          <a href="https://github.com/aebarthyi" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/in/andrew-barth-yi" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="/blog">Blog</a>
+        </nav>
+      </div>
     </div>
   </main>
 

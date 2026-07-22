@@ -1,0 +1,58 @@
+/* circuit-background.css — styles for the animated schematic background.
+   Colours are set per plane by the script via --cbg-* custom properties. */
+
+.cbg-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;            /* keep at 0, not -1: a negative z-index can fall behind
+                            an opaque page background on some setups */
+  pointer-events: none;  /* never intercept clicks */
+  overflow: hidden;
+  background: radial-gradient(130% 130% at 30% 15%, #051009 0%, #020502 55%, #010301 100%);
+}
+
+.cbg-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transition: opacity .35s linear;
+}
+
+.cbg-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  will-change: transform;
+}
+
+.cbg-copy { flex: 0 0 auto; }
+.cbg-copy svg { display: block; }
+
+/* net-value colouring: unlit = logic 0, lit = logic 1 */
+.cbg-root .w { stroke: var(--cbg-unlit); fill: none; }
+.cbg-root .w.lit { stroke: var(--cbg-lit); }
+.cbg-root .s { stroke: var(--cbg-unlit); }
+.cbg-root .s.lit { stroke: var(--cbg-lit); }
+.cbg-root .p { fill: var(--cbg-unlit); }
+.cbg-root .p.lit { fill: var(--cbg-lit); }
+.cbg-root .labels text { fill: var(--cbg-label); }
+
+/* only the foreground plane pays for colour transitions */
+.cbg-fore .w, .cbg-fore .s { transition: stroke .10s linear; }
+.cbg-fore .p { transition: fill .10s linear; }
+
+.cbg-hud {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 9;
+  pointer-events: none;
+  color: #3f9a55;
+  font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: .05em;
+}
+
+/* Your page content must sit above the background. */
+.cbg-content { position: relative; z-index: 1; }

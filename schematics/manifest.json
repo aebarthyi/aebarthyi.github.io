@@ -1,0 +1,64 @@
+{
+  "designs": [
+    {
+      "key": "alu",
+      "name": "16-bit ALU",
+      "svg": "schematics/alu.svg",
+      "sim": "schematics/alu.sim.json",
+      "w": 8560.0,
+      "h": 806.0,
+      "gates": 215,
+      "dffs": 0
+    },
+    {
+      "key": "mult",
+      "name": "6x6 array multiplier",
+      "svg": "schematics/mult.svg",
+      "sim": "schematics/mult.sim.json",
+      "w": 5710.0,
+      "h": 806.0,
+      "gates": 168,
+      "dffs": 0
+    },
+    {
+      "key": "barrel",
+      "name": "16-bit barrel rotator",
+      "svg": "schematics/barrel.svg",
+      "sim": "schematics/barrel.sim.json",
+      "w": 4510.0,
+      "h": 842.0,
+      "gates": 196,
+      "dffs": 0
+    },
+    {
+      "key": "crc",
+      "name": "parallel CRC-16",
+      "svg": "schematics/crc.svg",
+      "sim": "schematics/crc.sim.json",
+      "w": 3163.0,
+      "h": 916.0,
+      "gates": 108,
+      "dffs": 16
+    },
+    {
+      "key": "cmp",
+      "name": "16-bit magnitude comparator",
+      "svg": "schematics/cmp.svg",
+      "sim": "schematics/cmp.sim.json",
+      "w": 4360.0,
+      "h": 835.0,
+      "gates": 94,
+      "dffs": 0
+    },
+    {
+      "key": "seq",
+      "name": "LFSR + accumulator",
+      "svg": "schematics/seq.svg",
+      "sim": "schematics/seq.sim.json",
+      "w": 6160.0,
+      "h": 972.0,
+      "gates": 80,
+      "dffs": 32
+    }
+  ]
+}

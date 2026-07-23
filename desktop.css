@@ -1,0 +1,523 @@
+/* =====================================================================
+   desktop.css — IRIX / SGI 4Dwm window manager
+   Chrome built from the real sgi-enhanced xfwm4 theme assets
+   (assets/sgi/*.png). Cursors from assets/cursors/*.png.
+   Palette: base #a59f80, hi #dad7ca, shadow #5b5746, outline/text #000.
+   ===================================================================== */
+
+/* ---- custom IRIX cursors ---- */
+:root {
+  --cur-arrow: url("assets/cursors/arrow.png") 1 1;
+  --cur-move:  url("assets/cursors/move.png") 1 1;
+  --cur-hand:  url("assets/cursors/hand.png") 12 2;
+  --cur-text:  url("assets/cursors/text.png") 16 16;
+  --cur-ns:    url("assets/cursors/ns.png") 16 16;
+  --cur-ew:    url("assets/cursors/ew.png") 16 16;
+  --cur-nesw:  url("assets/cursors/nesw.png") 16 16;
+  --cur-nwse:  url("assets/cursors/nwse.png") 16 16;
+}
+body { cursor: var(--cur-arrow), auto; }
+a, .nav a, .wb, .taskbar button, [role="button"] { cursor: var(--cur-hand), pointer; }
+.window-body p, .window-body li, .window-body h1, .window-body h2 { cursor: var(--cur-text), text; }
+
+/* ---- desktop surface: windows live here, absolutely positioned ---- */
+.desktop {
+  position: fixed;
+  inset: 0 0 var(--taskbar-h, 40px) 0;   /* leave room for the taskbar */
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* =====================================================================
+   window
+   ===================================================================== */
+.window {
+  --u: 1;                             /* integer pixel-scale of the chrome */
+  --base: #a59f80;
+  --bd:  calc(8px  * var(--u));       /* side / bottom border thickness    */
+  --th:  calc(32px * var(--u));       /* title-bar height: 8px top bevel + 24px face */
+  --face: calc(24px * var(--u));      /* control-button / title face height */
+  --cap: calc(8px  * var(--u));       /* title-bar end caps                */
+  --corner: calc(34px * var(--u));    /* bottom resize-grip corners        */
+  --notch-x: calc(32px * var(--u));   /* top-border notch distance from each corner */
+  position: absolute;
+  width: min(92vw, 600px);
+  display: flex;                     /* column layout so an explicit height flows */
+  flex-direction: column;
+  background: var(--base);
+  outline: calc(1px * var(--u)) solid #000;   /* crisp black window edge, all sides */
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 6px 16px rgba(0, 0, 0, .55));
+}
+.window * { image-rendering: pixelated; }
+.window[hidden] { display: none; }
+
+/* an unfocused window dims its shadow so the active one reads as on top */
+.window:not(.is-active) { filter: drop-shadow(2px 3px 8px rgba(0, 0, 0, .45)); }
+
+/* ---- title bar: end caps + window controls over the tiled title fill ---- */
+.titlebar {
+  position: relative;
+  display: flex;
+  align-items: flex-end;              /* controls drop into the face, below the top bevel */
+  height: var(--th);
+  background: url("assets/sgi/title-3-active.png") repeat-x left top;
+  background-size: calc(4px * var(--u)) 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: var(--cur-move), move;
+}
+/* two chiseled notches on the top border (shadow + highlight groove) */
+.titlebar::before,
+.titlebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: calc(4px * var(--u));
+  height: calc(var(--th) - var(--face));
+  background: url("assets/sgi/title-2-active.png") no-repeat left top;
+  background-size: calc(4px * var(--u)) var(--th);
+  pointer-events: none;
+}
+.titlebar::before { left:  var(--notch-x); }
+.titlebar::after  { right: var(--notch-x); transform: scaleX(-1); }
+.titlebar .cap  { flex: 0 0 var(--cap); height: var(--th); background-repeat: no-repeat; background-size: 100% 100%; }
+.titlebar .capL { background-image: url("assets/sgi/cap-l32.png"); }
+.titlebar .capR { background-image: url("assets/sgi/cap-r32.png"); }
+
+.wb {
+  flex: 0 0 auto;
+  height: var(--face);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+}
+.wb-menu    { width: calc(24px * var(--u)); background-image: url("assets/sgi/btn-menu.png"); }
+.wb-iconify { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-iconify.png"); }
+.wb-max     { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-max.png"); }
+.wb-menu:active    { background-image: url("assets/sgi/btn-menu-p.png"); }
+.wb-iconify:active { background-image: url("assets/sgi/btn-iconify-p.png"); }
+.wb-max:active     { background-image: url("assets/sgi/btn-max-p.png"); }
+/* a control the window doesn't support is dimmed and inert */
+.wb[data-disabled] { opacity: .4; pointer-events: none; }
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--face);
+  display: flex;
+  align-items: center;
+  padding: 0 calc(6px * var(--u));
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;                 /* signature IRIX italic */
+  font-weight: 700;
+  font-size: calc(11px * var(--u));
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- client frame: real left/right/bottom borders + resize-grip corners ---- */
+.frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--bd) var(--bd);
+  background-color: var(--base);
+  background-image:
+    url("assets/sgi/left-active.png"),
+    url("assets/sgi/right-active.png"),
+    url("assets/sgi/bottom-active.png");
+  background-repeat: repeat-y, repeat-y, repeat-x;
+  background-position: left top, right top, left bottom;
+  background-size: var(--bd) auto, var(--bd) auto, auto var(--bd);
+}
+.frame::before,
+.frame::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: var(--corner);
+  height: var(--corner);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+.frame::before { left: 0;  background-image: url("assets/sgi/bottom-left-active.png"); }
+.frame::after  { right: 0; background-image: url("assets/sgi/bottom-right-active.png"); }
+
+/* ---- client area content ---- */
+.window-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: clamp(1.8rem, 6vw, 3.2rem) clamp(1.4rem, 5vw, 2.6rem) clamp(1.8rem, 5vw, 2.8rem);
+  text-align: center;
+  background: var(--base);
+  image-rendering: auto;
+  color: #1a170e;
+  overflow: auto;
+}
+.window-body h1 {
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 6vw, 3.4rem);
+  letter-spacing: .01em;
+  color: #1a170e;
+  text-shadow: 0 1px 0 rgba(218, 215, 202, .7),
+               0 -1px 0 rgba(0, 0, 0, .2);
+}
+.window-body p {
+  margin-top: 1rem;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: clamp(.85rem, 2vw, 1rem);
+  color: #2b2718;
+}
+
+/* ---- SGI-styled buttons (nav launchers + generic) ---- */
+.nav {
+  margin-top: 1.8rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .55rem;
+}
+.nav a, .btn {
+  display: inline-block;
+  padding: .45rem 1.3rem;
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(.72rem, 1.4vw, .88rem);
+  text-decoration: none;
+  color: #000;
+  background: #a59f80;
+  border-style: solid;
+  border-width: 2px;
+  border-top-color: #dad7ca;
+  border-left-color: #dad7ca;
+  border-right-color: #5b5746;
+  border-bottom-color: #5b5746;
+  outline: 1px solid #000;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .28),
+              inset -1px -1px 0 rgba(0, 0, 0, .30);
+}
+.nav a:hover, .btn:hover { background: #b3ad8d; }
+.nav a:active, .btn:active {
+  background: #948e70;
+  border-top-color: #5b5746;
+  border-left-color: #5b5746;
+  border-right-color: #dad7ca;
+  border-bottom-color: #dad7ca;
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .30),
+              inset -1px -1px 0 rgba(255, 255, 255, .28);
+}
+
+/* =====================================================================
+   resize handles — invisible strips on each edge + corner
+   ===================================================================== */
+.rz { position: absolute; z-index: 5; touch-action: none; }
+.rz-n  { top: -3px; left: 8px; right: 8px; height: 8px; cursor: var(--cur-ns), ns-resize; }
+.rz-s  { bottom: -3px; left: 8px; right: 8px; height: 8px; cursor: var(--cur-ns), ns-resize; }
+.rz-e  { top: 8px; bottom: 8px; right: -3px; width: 8px; cursor: var(--cur-ew), ew-resize; }
+.rz-w  { top: 8px; bottom: 8px; left: -3px; width: 8px; cursor: var(--cur-ew), ew-resize; }
+.rz-ne { top: -3px; right: -3px; width: 16px; height: 16px; cursor: var(--cur-nesw), nesw-resize; }
+.rz-sw { bottom: -3px; left: -3px; width: 34px; height: 34px; cursor: var(--cur-nesw), nesw-resize; }
+.rz-nw { top: -3px; left: -3px; width: 16px; height: 16px; cursor: var(--cur-nwse), nwse-resize; }
+.rz-se { bottom: -3px; right: -3px; width: 34px; height: 34px; cursor: var(--cur-nwse), nwse-resize; }
+
+/* maximized: fill the desktop, drop the shadow + rounded feel, no resize */
+.window.is-max { filter: none !important; }
+.window.is-max .rz { display: none; }
+.window.is-max .titlebar { cursor: var(--cur-arrow), default; }
+
+/* while dragging/resizing, kill selection + transitions */
+.window.dragging, .window.resizing { user-select: none; }
+
+/* =====================================================================
+   taskbar — fixed dock listing every open window
+   ===================================================================== */
+.taskbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--taskbar-h, 40px);
+  z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #2b2f27;
+  border-top: 2px solid #5b5746;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+.taskbar .tb-brand {
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 8px;
+  margin-right: 4px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 13px;
+  color: #dad7ca;
+  border-right: 1px solid #5b5746;
+  white-space: nowrap;
+}
+.taskbar .tb-clock {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: #9fd8c4;
+  border-left: 1px solid #5b5746;
+  white-space: nowrap;
+}
+.taskbar button {
+  flex: 0 1 190px;
+  min-width: 44px;
+  max-width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 12px;
+  color: #000;
+  background: #a59f80;
+  border: 2px solid;
+  border-top-color: #dad7ca;
+  border-left-color: #dad7ca;
+  border-right-color: #5b5746;
+  border-bottom-color: #5b5746;
+  outline: 1px solid #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.taskbar button .tb-label { overflow: hidden; text-overflow: ellipsis; }
+.taskbar button.is-active {
+  background: #c4bd99;
+  border-top-color: #5b5746;
+  border-left-color: #5b5746;
+  border-right-color: #dad7ca;
+  border-bottom-color: #dad7ca;
+}
+.taskbar button.is-min { font-style: italic; color: #3a3626; opacity: .8; }
+.taskbar button.is-min::before { content: "▾ "; }
+
+/* =====================================================================
+   IRIX scrollbar.
+   The ::-webkit-scrollbar rules below are a no-JS fallback (WebKit only).
+   When irix-scrollbar.js runs it wraps the element, hides the native bar
+   in every browser, and draws the custom overlay bar (.iscroll) — so the
+   IRIX look is identical on Firefox and Chromium. See ".iscroll" below.
+   ===================================================================== */
+.irix-scroll { scrollbar-width: auto; scrollbar-color: #a59f80 #837e64; }
+.irix-scroll::-webkit-scrollbar { width: 20px; height: 20px; }
+.irix-scroll::-webkit-scrollbar-corner { background: #837e64; }
+
+/* recessed track */
+.irix-scroll::-webkit-scrollbar-track {
+  background: #837e64;
+  box-shadow: inset 1px 1px 0 #5b5746, inset -1px -1px 0 #b9b291;
+}
+
+/* raised thumb with a centred grip */
+.irix-scroll::-webkit-scrollbar-thumb {
+  background: #a59f80;
+  border: 2px solid;
+  border-top-color: #dad7ca; border-left-color: #dad7ca;
+  border-right-color: #5b5746; border-bottom-color: #5b5746;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .25),
+              inset -1px -1px 0 rgba(0, 0, 0, .30);
+}
+.irix-scroll::-webkit-scrollbar-thumb:hover { background: #b3ad8d; }
+.irix-scroll::-webkit-scrollbar-thumb:active {
+  background: #948e70;
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+}
+
+/* arrow steppers at each end */
+.irix-scroll::-webkit-scrollbar-button {
+  background-color: #a59f80;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+  border: 2px solid;
+  border-top-color: #dad7ca; border-left-color: #dad7ca;
+  border-right-color: #5b5746; border-bottom-color: #5b5746;
+}
+.irix-scroll::-webkit-scrollbar-button:active {
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+}
+.irix-scroll::-webkit-scrollbar-button:vertical:decrement:single-button,
+.irix-scroll::-webkit-scrollbar-button:vertical:decrement {
+  height: 20px; width: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1 9 8 1 8Z' fill='%231a170e'/%3E%3C/svg%3E");
+}
+.irix-scroll::-webkit-scrollbar-button:vertical:increment:single-button,
+.irix-scroll::-webkit-scrollbar-button:vertical:increment {
+  height: 20px; width: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 9 1 2 9 2Z' fill='%231a170e'/%3E%3C/svg%3E");
+}
+.irix-scroll::-webkit-scrollbar-button:horizontal:decrement:single-button,
+.irix-scroll::-webkit-scrollbar-button:horizontal:decrement {
+  width: 20px; height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 5 8 1 8 9Z' fill='%231a170e'/%3E%3C/svg%3E");
+}
+.irix-scroll::-webkit-scrollbar-button:horizontal:increment:single-button,
+.irix-scroll::-webkit-scrollbar-button:horizontal:increment {
+  width: 20px; height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M9 5 2 9 2 1Z' fill='%231a170e'/%3E%3C/svg%3E");
+}
+/* suppress the extra doubled buttons WebKit would otherwise add */
+.irix-scroll::-webkit-scrollbar-button:vertical:decrement:end,
+.irix-scroll::-webkit-scrollbar-button:vertical:increment:start,
+.irix-scroll::-webkit-scrollbar-button:horizontal:decrement:end,
+.irix-scroll::-webkit-scrollbar-button:horizontal:increment:start {
+  display: none;
+}
+
+/* ---- custom overlay bar (cross-browser, built by irix-scrollbar.js) ----
+   The bar is appended into the .frame (position:relative) and anchored over
+   the window-body's right edge, above the resize handles so the steppers stay
+   clickable. The frame's right border (--bd) sits outside it, and the bottom
+   corner grip peeks past on the left for resizing. */
+
+/* once attached, the native scrollbar is hidden in all engines */
+.irix-scroll.has-iscroll { scrollbar-width: none; }
+.irix-scroll.has-iscroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+.iscroll {
+  position: absolute;
+  top: 0;
+  right: var(--bd, 8px);               /* just inside the frame's right border */
+  bottom: var(--bd, 8px);
+  width: 20px;
+  z-index: 6;                          /* above the .rz resize handles (z 5) */
+  display: flex;
+  flex-direction: column;
+  background: #837e64;                 /* recessed trough */
+  box-shadow: inset 1px 1px 0 #5b5746, inset -1px -1px 0 #b9b291;
+}
+.iscroll[hidden] { display: none; }
+
+.iscroll-btn {
+  flex: 0 0 20px;
+  width: 20px; height: 20px;
+  padding: 0;
+  background-color: #a59f80;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+  border: 2px solid;
+  border-top-color: #dad7ca; border-left-color: #dad7ca;
+  border-right-color: #5b5746; border-bottom-color: #5b5746;
+  cursor: var(--cur-hand), pointer;
+}
+.iscroll-btn:active {
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+}
+.iscroll-up   { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1 9 8 1 8Z' fill='%231a170e'/%3E%3C/svg%3E"); }
+.iscroll-down { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 9 1 2 9 2Z' fill='%231a170e'/%3E%3C/svg%3E"); }
+
+.iscroll-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.iscroll-thumb {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  min-height: 24px;
+  background: #a59f80;
+  border: 2px solid;
+  border-top-color: #dad7ca; border-left-color: #dad7ca;
+  border-right-color: #5b5746; border-bottom-color: #5b5746;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .25),
+              inset -1px -1px 0 rgba(0, 0, 0, .30);
+  cursor: var(--cur-arrow), default;
+}
+.iscroll-thumb:hover { background: #b3ad8d; }
+.iscroll-thumb.dragging,
+.iscroll-thumb:active {
+  background: #948e70;
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+}
+
+/* =====================================================================
+   desktop icons — pedestal glyph + label, IRIX select highlight
+   ===================================================================== */
+.desk-icons {
+  position: absolute;
+  top: 16px; left: 16px;
+  z-index: 2;                         /* above the background, below windows */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px 18px;
+  max-height: calc(100% - 32px);
+}
+.desk-icon {
+  width: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: var(--cur-hand), pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.desk-icon img {
+  width: 48px; height: 48px;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, .5));
+}
+.desk-icon .desk-icon-label {
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
+  color: #eaf5ef;
+  padding: 1px 5px;
+  border: 1px solid transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+  max-width: 100%;
+  white-space: nowrap;
+}
+.desk-icon:hover .desk-icon-label { color: #fff; }
+/* IRIX selection: inverted label with a chiseled border, brightened glyph */
+.desk-icon.is-selected .desk-icon-label {
+  color: #000;
+  background: #f4c542;                 /* IRIX amber select */
+  border-color: #000;
+  text-shadow: none;
+}
+.desk-icon.is-selected img { filter: drop-shadow(0 0 0 #000) brightness(1.08); }
+.desk-icon:focus-visible { outline: none; }
+.desk-icon:focus-visible .desk-icon-label { border-color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .window { transition: none !important; }
+}

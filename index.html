@@ -6,397 +6,173 @@
 <title>Andrew's Site</title>
 
 <link rel="stylesheet" href="circuit-background.css">
+<link rel="stylesheet" href="desktop.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
+  :root { --taskbar-h: 40px; }
   body {
     background: #020402;
     font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     color: #cfeee6;
-  }
-  .cbg-content { height: 100%; display: grid; place-items: center; padding: 6vw; }
-
-  /* =====================================================================
-     IRIX / SGI 4Dwm window — built from the real sgi-enhanced xfwm4 theme
-     assets (assets/sgi/*.png). Palette: base #a59f80, hi #dad7ca,
-     shadow #5b5746, black outline #000, text #000.
-     ===================================================================== */
-  .window {
-    --u: 1;                             /* integer pixel-scale of the chrome */
-    --base: #a59f80;
-    --bd:  calc(8px  * var(--u));       /* side / bottom border thickness    */
-    --th:  calc(32px * var(--u));       /* title-bar height: 8px top bevel + 24px face */
-    --face: calc(24px * var(--u));      /* control-button / title face height */
-    --cap: calc(8px  * var(--u));       /* title-bar end caps                */
-    --corner: calc(34px * var(--u));    /* bottom resize-grip corners        */
-    --notch-x: calc(32px * var(--u));   /* top-border notch distance from each corner */
-    position: relative;
-    width: min(92vw, 600px);
-    background: var(--base);
-    outline: calc(1px * var(--u)) solid #000;   /* crisp black window edge, all sides */
-    image-rendering: pixelated;
-    filter: drop-shadow(4px 6px 16px rgba(0, 0, 0, .55));
-  }
-  .window * { image-rendering: pixelated; }
-
-  /* ---- title bar: end caps + window controls over the tiled title fill ---- */
-  .titlebar {
-    position: relative;
-    display: flex;
-    align-items: flex-end;              /* controls drop into the face, below the top bevel */
-    height: var(--th);
-    background: url("assets/sgi/title-3-active.png") repeat-x left top;
-    background-size: calc(4px * var(--u)) 100%;
-  }
-  /* two chiseled notches on the top border (shadow + highlight groove),
-     drawn in the top-bevel strip so they stay visible above the buttons.
-     --notch-x sets the distance from each corner. */
-  .titlebar::before,
-  .titlebar::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: calc(4px * var(--u));                        /* title-2 native width */
-    height: calc(var(--th) - var(--face));              /* top-bevel strip (clears the buttons) */
-    background: url("assets/sgi/title-2-active.png") no-repeat left top;
-    background-size: calc(4px * var(--u)) var(--th);    /* full art, clipped to the bevel */
-    pointer-events: none;
-  }
-  .titlebar::before { left:  var(--notch-x); }
-  .titlebar::after  { right: var(--notch-x); transform: scaleX(-1); }   /* mirror of title-2 */
-  .titlebar .cap  { flex: 0 0 var(--cap); height: var(--th); background-repeat: no-repeat; background-size: 100% 100%; }
-  .titlebar .capL { background-image: url("assets/sgi/cap-l32.png"); }
-  .titlebar .capR { background-image: url("assets/sgi/cap-r32.png"); }
-
-  .wb {
-    flex: 0 0 auto;
-    height: var(--face);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
-  .wb-menu    { width: calc(24px * var(--u)); background-image: url("assets/sgi/btn-menu.png"); }
-  .wb-iconify { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-iconify.png"); }
-  .wb-max     { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-max.png"); }
-  .wb-menu:active    { background-image: url("assets/sgi/btn-menu-p.png"); }
-  .wb-iconify:active { background-image: url("assets/sgi/btn-iconify-p.png"); }
-  .wb-max:active     { background-image: url("assets/sgi/btn-max-p.png"); }
-
-  .title {
-    flex: 1 1 auto;
-    min-width: 0;
-    height: var(--face);
-    display: flex;
-    align-items: center;
-    padding: 0 calc(6px * var(--u));
-    font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;                 /* signature IRIX italic */
-    font-weight: 700;
-    font-size: calc(11px * var(--u));
-    color: #000;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
-  /* ---- client frame: real left/right/bottom borders + resize-grip corners ---- */
-  .frame {
-    position: relative;
-    padding: 0 var(--bd) var(--bd);
-    background-color: var(--base);
-    background-image:
-      url("assets/sgi/left-active.png"),
-      url("assets/sgi/right-active.png"),
-      url("assets/sgi/bottom-active.png");
-    background-repeat: repeat-y, repeat-y, repeat-x;
-    background-position: left top, right top, left bottom;
-    background-size: var(--bd) auto, var(--bd) auto, auto var(--bd);
-  }
-  .frame::before,
-  .frame::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    width: var(--corner);
-    height: var(--corner);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    pointer-events: none;
-  }
-  .frame::before { left: 0;  background-image: url("assets/sgi/bottom-left-active.png"); }
-  .frame::after  { right: 0; background-image: url("assets/sgi/bottom-right-active.png"); }
-
-  /* ---- client area content ---- */
-  .window-body {
-    padding: clamp(1.8rem, 6vw, 3.2rem) clamp(1.4rem, 5vw, 2.6rem) clamp(1.8rem, 5vw, 2.8rem);
-    text-align: center;
-    background: var(--base);
-    image-rendering: auto;
-  }
-  .window-body h1 {
+  /* about window reads as a document: left-aligned, real headings + lists */
+  .window-body--doc { text-align: left; }
+  .window-body--doc h1 { font-size: clamp(1.5rem, 4vw, 2.4rem); margin-bottom: .2rem; }
+  .window-body--doc h2 {
     font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;
-    font-weight: 700;
-    font-size: clamp(1.8rem, 6vw, 3.4rem);
-    letter-spacing: .01em;
+    font-style: italic; font-weight: 700;
+    font-size: clamp(1rem, 2.6vw, 1.25rem);
     color: #1a170e;
-    text-shadow: 0 1px 0 rgba(218, 215, 202, .7),
-                 0 -1px 0 rgba(0, 0, 0, .2);
+    margin: 1.3rem 0 .3rem;
+    padding-bottom: .2rem;
+    border-bottom: 2px solid #5b5746;
+    box-shadow: 0 1px 0 rgba(218, 215, 202, .6);
   }
-
-  /* ---- SGI-styled navigation buttons ---- */
-  .nav {
-    margin-top: 1.8rem;
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: .55rem;
-  }
-  .nav a {
-    display: inline-block;
-    padding: .45rem 1.3rem;
+  .window-body--doc p { margin-top: .5rem; line-height: 1.5; }
+  .window-body--doc ul { margin: .4rem 0 .4rem 1.2rem; }
+  .window-body--doc li {
     font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;
-    font-weight: 700;
-    font-size: clamp(.72rem, 1.4vw, .88rem);
-    text-decoration: none;
-    color: #000;
-    background: #a59f80;
-    border-style: solid;
-    border-width: 2px;
-    border-top-color: #dad7ca;
-    border-left-color: #dad7ca;
-    border-right-color: #5b5746;
-    border-bottom-color: #5b5746;
-    outline: 1px solid #000;
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .28),
-                inset -1px -1px 0 rgba(0, 0, 0, .30);
-  }
-  .nav a:hover { background: #b3ad8d; }
-  .nav a:active {
-    background: #948e70;
-    border-top-color: #5b5746;
-    border-left-color: #5b5746;
-    border-right-color: #dad7ca;
-    border-bottom-color: #dad7ca;
-    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .30),
-                inset -1px -1px 0 rgba(255, 255, 255, .28);
-  }
-
-  /* ---- second window spawned onto the running desktop ---- */
-  .desktop-overlay {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: 6vw;
-    z-index: 10;
-  }
-  .desktop-overlay[hidden] { display: none; }
-  /* dim the backdrop just slightly so the new window reads as "on top",
-     without hiding the circuit animation underneath */
-  .desktop-overlay::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(2, 4, 2, .35);
-    opacity: 0;
-    transition: opacity .28s ease;
-  }
-  .desktop-overlay.is-open::before { opacity: 1; }
-  /* the blog window animates its own transform, so no positioning transform here */
-  .window--blog { transform-origin: top left; will-change: transform, opacity; }
-
-  /* draggable chrome: don't let the titlebar select text or scroll on touch */
-  .titlebar { user-select: none; -webkit-user-select: none; touch-action: none; }
-  .window.dragging { user-select: none; }
-
-  .window-body p {
-    margin-top: 1rem;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: clamp(.85rem, 2vw, 1rem);
+    font-size: clamp(.82rem, 1.8vw, .95rem);
     color: #2b2718;
+    line-height: 1.5;
+    margin: .2rem 0;
   }
-  /* close (menu) button acts as the window close control */
-  .wb-menu { cursor: pointer; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .desktop-overlay::before { transition: none; }
-  }
+  .window-body--doc a { color: #14332a; font-weight: 700; }
+  .window-body--doc .logos { margin-top: 1.4rem; display: flex; flex-direction: column; gap: .6rem; }
+  .window-body--doc .logos img { max-width: 100%; height: auto; background: #fff; padding: 6px; }
 </style>
 </head>
 <body>
 
-  <!-- Background mounts itself here (or creates its own container). -->
+  <!-- Background mounts itself behind everything. -->
 
-  <main class="cbg-content">
-    <div class="window">
+  <!-- ===================== desktop surface ===================== -->
+  <div class="desktop" id="desktop">
+
+    <!-- desktop icons: single-click selects, double-click / Enter opens -->
+    <div class="desk-icons" id="deskIcons">
+      <button class="desk-icon" type="button" data-open="win-about">
+        <img src="assets/icons/about.png" alt="">
+        <span class="desk-icon-label">About</span>
+      </button>
+      <button class="desk-icon" type="button" data-href="https://github.com/aebarthyi">
+        <img src="assets/icons/github.png" alt="">
+        <span class="desk-icon-label">GitHub</span>
+      </button>
+      <button class="desk-icon" type="button" data-href="https://www.linkedin.com/in/aebarthyi">
+        <img src="assets/icons/linkedin.png" alt="">
+        <span class="desk-icon-label">LinkedIn</span>
+      </button>
+      <button class="desk-icon" type="button" data-open="win-blog">
+        <img src="assets/icons/blog.png" alt="">
+        <span class="desk-icon-label">Blog</span>
+      </button>
+    </div>
+
+    <!-- home / launcher window (always present, cannot be closed) -->
+    <section class="window is-active" id="win-home" data-label="Welcome" data-closable="false">
       <div class="titlebar">
         <span class="cap capL"></span>
-        <span class="wb wb-menu" aria-hidden="true"></span>
+        <button class="wb wb-menu" type="button" aria-label="Window menu"></button>
         <span class="title">andrew@indigo:~</span>
-        <span class="wb wb-iconify" aria-hidden="true"></span>
-        <span class="wb wb-max" aria-hidden="true"></span>
+        <button class="wb wb-iconify" type="button" aria-label="Minimize"></button>
+        <button class="wb wb-max" type="button" aria-label="Maximize"></button>
         <span class="cap capR"></span>
       </div>
       <div class="frame">
-        <div class="window-body">
+        <div class="window-body irix-scroll">
           <h1>Andrew Barth-Yi</h1>
-          <nav class="nav">
-            <a href="about.html">About</a>
-            <a href="https://github.com/aebarthyi" target="_blank" rel="noopener">GitHub</a>
-            <a href="https://www.linkedin.com/in/aebarthyi" target="_blank" rel="noopener">LinkedIn</a>
-            <a href="blog.html">Blog</a>
-          </nav>
+          <p>placeholder for now, welcome dialog soon</p>
         </div>
       </div>
-    </div>
-  </main>
+    </section>
 
-  <!-- Blog window: spawned onto the same desktop, no page reload. -->
-  <div class="desktop-overlay" id="blogOverlay" hidden>
-    <div class="window window--blog" id="blogWindow" role="dialog" aria-modal="true" aria-label="Blog">
+    <!-- about window (opens from the launcher, closable) -->
+    <section class="window" id="win-about" data-label="About" hidden>
       <div class="titlebar">
         <span class="cap capL"></span>
-        <span class="wb wb-menu" id="blogClose" role="button" tabindex="0" aria-label="Close window"></span>
-        <span class="title">andrew@indigo:~/blog</span>
-        <span class="wb wb-iconify" aria-hidden="true"></span>
-        <span class="wb wb-max" aria-hidden="true"></span>
+        <button class="wb wb-menu" type="button" aria-label="Close"></button>
+        <span class="title">andrew@indigo:~/about</span>
+        <button class="wb wb-iconify" type="button" aria-label="Minimize"></button>
+        <button class="wb wb-max" type="button" aria-label="Maximize"></button>
         <span class="cap capR"></span>
       </div>
       <div class="frame">
-        <div class="window-body">
+        <div class="window-body window-body--doc irix-scroll" style="max-height: 70vh;">
+          <h1>About Me</h1>
+          <p>
+            I am a 5th year undergraduate computer engineering major at the
+            University of California, Santa Cruz. I enjoy playing the drums,
+            lifting weights, rock climbing, and snowboarding. My interests
+            include (but are not limited to) High-Performance Computing, ASIC
+            design, Computer Architecture, Compilers, Operating Systems, Digital
+            Signal Processing, and Control Theory.
+          </p>
+
+          <h2>Professional Experience</h2>
+          <ul>
+            <li>
+              Research Engineer @
+              <a href="https://tactcomplabs.com/" target="_blank" rel="noopener">Tactical Computing Laboratories</a>
+              &mdash; June 2024 to Present
+              <ul>
+                <li>Accelerator design using Chisel HDL for FPGA emulation on FireSim</li>
+                <li>IARPA AGILE &mdash; microarchitecture design &amp; verification</li>
+                <li>Research on non-AI HPC workload acceleration on AI accelerators using Tenstorrent devices</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h2>Academic Experience</h2>
+          <ul>
+            <li>Research Assistant @ UCSC under Dustin Richmond &mdash; October 2024 to Present</li>
+            <li>Team Captain of the UCSC not-so-slow-slugs HPC team &mdash; August 2024 to Present</li>
+            <li>Group Tutor for CSE120 &mdash; Computer Architecture &mdash; March 2024 to June 2024</li>
+          </ul>
+
+          <h2>Education</h2>
+          <ul>
+            <li>BS in Computer Engineering @ UCSC &mdash; June 2025 (in progress)</li>
+          </ul>
+
+          <div class="logos">
+            <img src="BE_Horizontal-Lockup_RGB_color.png" alt="Best Engineering lockup" loading="lazy">
+            <img src="tc_logo_side_text_LARGE.png" alt="Tactical Computing Laboratories logo" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- blog window (opens from the launcher, closable) -->
+    <section class="window" id="win-blog" data-label="Blog" hidden>
+      <div class="titlebar">
+        <span class="cap capL"></span>
+        <button class="wb wb-menu" type="button" aria-label="Close"></button>
+        <span class="title">andrew@indigo:~/blog</span>
+        <button class="wb wb-iconify" type="button" aria-label="Minimize"></button>
+        <button class="wb wb-max" type="button" aria-label="Maximize"></button>
+        <span class="cap capR"></span>
+      </div>
+      <div class="frame">
+        <div class="window-body irix-scroll">
           <h1>Blog</h1>
           <p>Under construction &mdash; posts coming soon.</p>
-          <nav class="nav">
-            <a href="#" data-close>&larr; Home</a>
-          </nav>
         </div>
       </div>
-    </div>
+    </section>
+
+  </div><!-- /.desktop -->
+
+  <!-- ===================== taskbar ===================== -->
+  <div class="taskbar" id="taskbar">
+    <span class="tb-brand">IRIX &bull; andrew</span>
   </div>
 
   <script src="circuit-background.js" defer></script>
-  <script>
-  (function () {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    /* ---- draggable windows: translate offset from each window's laid-out spot ---- */
-    const offsets = new WeakMap();   // window el -> {x, y}
-    let zTop = 20;
-
-    function offsetOf(el) {
-      let o = offsets.get(el);
-      if (!o) { o = { x: 0, y: 0 }; offsets.set(el, o); }
-      return o;
-    }
-    function applyOffset(el) {
-      const o = offsetOf(el);
-      el.style.transform = (o.x || o.y) ? `translate(${o.x}px, ${o.y}px)` : "";
-    }
-    function raise(el) { el.style.zIndex = ++zTop; }
-
-    function makeDraggable(win, handle) {
-      handle.addEventListener("pointerdown", (e) => {
-        if (e.button !== 0) return;
-        if (e.target.closest(".wb, [role='button'], a")) return;  // let controls click
-        const o = offsetOf(win);
-        const startX = e.clientX, startY = e.clientY;
-        const baseX = o.x, baseY = o.y;
-        raise(win);
-        win.classList.add("dragging");
-        handle.setPointerCapture(e.pointerId);
-
-        const move = (ev) => {
-          o.x = baseX + (ev.clientX - startX);
-          o.y = baseY + (ev.clientY - startY);
-          win.style.transform = `translate(${o.x}px, ${o.y}px)`;
-        };
-        const up = (ev) => {
-          win.classList.remove("dragging");
-          handle.releasePointerCapture(ev.pointerId);
-          handle.removeEventListener("pointermove", move);
-          handle.removeEventListener("pointerup", up);
-          handle.removeEventListener("pointercancel", up);
-        };
-        handle.addEventListener("pointermove", move);
-        handle.addEventListener("pointerup", up);
-        handle.addEventListener("pointercancel", up);
-      });
-    }
-
-    // main window
-    const mainWin = document.querySelector("main .window");
-    makeDraggable(mainWin, mainWin.querySelector(".titlebar"));
-    mainWin.addEventListener("pointerdown", () => raise(mainWin));
-
-    /* ---- blog window: opens from the button, draggable once open ---- */
-    const overlay  = document.getElementById("blogOverlay");
-    const win      = document.getElementById("blogWindow");
-    const trigger  = document.querySelector('.nav a[href="blog.html"]');
-    const closeBtn = document.getElementById("blogClose");
-    let originEl   = trigger;   // element the window grows from / collapses back to
-    let anim       = null;
-
-    makeDraggable(win, win.querySelector(".titlebar"));
-
-    function flipFrom(rect, opening) {
-      const last = win.getBoundingClientRect();            // current visual box (incl. any drag)
-      const o = offsetOf(win);
-      const baseX = o.x, baseY = o.y;                      // preserve dragged position at rest
-      const dx = rect.left - last.left + baseX;
-      const dy = rect.top  - last.top  + baseY;
-      const sx = Math.max(rect.width  / last.width,  0.001);
-      const sy = Math.max(rect.height / last.height, 0.001);
-      const rest      = { transform: (baseX || baseY) ? `translate(${baseX}px, ${baseY}px)` : "none", opacity: 1 };
-      const collapsed = { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0.15 };
-      if (anim) anim.cancel();
-      anim = win.animate(opening ? [collapsed, rest] : [rest, collapsed], {
-        duration: reduce ? 0 : 320,
-        easing: opening ? "cubic-bezier(.2,.8,.2,1)" : "cubic-bezier(.4,0,.7,.2)",
-        fill: "both",
-      });
-      return anim;
-    }
-
-    function open(fromEl) {
-      originEl = fromEl || trigger;
-      const o = offsetOf(win); o.x = 0; o.y = 0;           // fresh spawn, centered
-      win.style.transform = "";
-      overlay.hidden = false;
-      raise(overlay);
-      requestAnimationFrame(() => {
-        overlay.classList.add("is-open");
-        const a = flipFrom(originEl.getBoundingClientRect(), true);
-        a.finished.then(() => {                            // hand transform back to inline style for dragging
-          try { a.commitStyles(); } catch (_) {}
-          a.cancel();
-          applyOffset(win);
-          closeBtn.focus();
-        }).catch(() => {});
-      });
-    }
-
-    function close() {
-      if (overlay.hidden) return;
-      overlay.classList.remove("is-open");
-      const a = flipFrom(originEl.getBoundingClientRect(), false);
-      const done = () => { overlay.hidden = true; anim = null; win.style.transform = ""; trigger.focus(); };
-      a.finished.then(done).catch(done);
-    }
-
-    trigger.addEventListener("click", (e) => { e.preventDefault(); open(trigger); });
-    closeBtn.addEventListener("click", close);
-    closeBtn.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); close(); }
-    });
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) close();                       // click the desktop
-      if (e.target.closest("[data-close]")) { e.preventDefault(); close(); }
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") close();
-    });
-  })();
-  </script>
+  <script src="desktop.js" defer></script>
+  <script src="irix-scrollbar.js" defer></script>
 </body>
 </html>

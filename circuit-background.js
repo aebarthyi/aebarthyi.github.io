@@ -22,8 +22,6 @@
     speed: 34,                  // foreground scroll, px/sec
     tick: 900,                  // ms between clock edges / new stimulus
     layerMs: 16,                // propagation ripple per logic level (foreground)
-    rotateMs: 15000,            // ms before each plane advances to the next design
-    fadeMs: 360,
     vdrift: 0.045,              // vertical drift rate when a design is taller than the viewport
     showHud: false,
     // three planes, evenly spaced in depth
@@ -39,7 +37,7 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var DESIGNS = [], RT = [], stack = [];
-  var root, hud, raf = 0, iv = 0, rot = 0, timers = [];
+  var root, hud, raf = 0, iv = 0, timers = [];
   var last = 0, t0 = 0, hidden = false, base = 0;
 
   /* ---------------- simulation ---------------- */
@@ -88,33 +86,54 @@
     if (c.anchor === 'bottom') return innerHeight - L.h * (1 - (c.bleed || 0));
     return (innerHeight - L.h) / 2 + (c.yBias || 0) * innerHeight * 0.5;
   }
-  function buildStrip(L) {
-    var d = DESIGNS[L.di];
-    L.h = innerHeight * 0.92 * L.cfg.scale;      // each design fits the height at scale 1
-    L.w = d.w * (L.h / d.h);
-    L.strip.innerHTML = '';
-    var need = Math.max(2, Math.ceil(innerWidth / L.w) + 1);
-    for (var c = 0; c < need; c++) {
-      var copy = document.createElement('div');
-      copy.className = 'cbg-copy';
-      copy.innerHTML = d.svg;
-      var s = copy.querySelector('svg');
-      s.setAttribute('width', L.w); s.setAttribute('height', L.h);
-      L.strip.appendChild(copy);
-    }
-    L.els = new Map();
-    L.strip.querySelectorAll('[data-net]').forEach(function (el) {
-      var n = el.getAttribute('data-net');
-      if (!L.els.has(n)) L.els.set(n, []);
-      L.els.get(n).push(el);
-    });
-    L.off = L.off % L.w;
+  function totalW(L) {
+    var s = 0;
+    for (var i = 0; i < L.cells.length; i++) s += L.cells[i].w;
+    return s;
   }
-  function paint(L, staggered) {
-    var r = RT[L.di], v = r.hist[L.cfg.delay] || r.vals, net, list, on, el;
+  function makeCell(L, di) {
+    var d = DESIGNS[di], w = d.w * (L.h / d.h);
+    var copy = document.createElement('div');
+    copy.className = 'cbg-copy';
+    copy.innerHTML = d.svg;
+    var s = copy.querySelector('svg');
+    s.setAttribute('width', w); s.setAttribute('height', L.h);
+    var els = new Map();
+    copy.querySelectorAll('[data-net]').forEach(function (el) {
+      var n = el.getAttribute('data-net');
+      if (!els.has(n)) els.set(n, []);
+      els.get(n).push(el);
+    });
+    return { di: di, w: w, el: copy, els: els };
+  }
+  function appendCell(L, di) {
+    var cell = makeCell(L, di);
+    L.strip.appendChild(cell.el);
+    L.cells.push(cell);
+    paintCell(L, cell, false);
+    return cell;
+  }
+  // Keep the treadmill covered: append the next design in the rotation until the
+  // row of cells fills the viewport ahead of the current scroll offset. Each cell
+  // is a distinct circuit, so the next one is always already sliding in behind the
+  // current one \u2014 no fade, no flash.
+  function ensureFilled(L) {
+    while (totalW(L) - L.off < innerWidth + 4) {
+      appendCell(L, L.nextDi);
+      L.nextDi = (L.nextDi + 1) % DESIGNS.length;
+    }
+  }
+  function buildStrip(L) {
+    L.h = innerHeight * 0.92 * L.cfg.scale;      // every design fits the height at scale 1
+    L.strip.innerHTML = '';
+    L.cells = [];
+    ensureFilled(L);
+  }
+  function paintCell(L, cell, staggered) {
+    var r = RT[cell.di], v = r.hist[L.cfg.delay] || r.vals, net, list, on;
     if (!staggered) {
       for (net in v) {
-        list = L.els.get(String(net)); if (!list) continue;
+        list = cell.els.get(String(net)); if (!list) continue;
         on = !!v[net];
         for (var i = 0; i < list.length; i++) list[i].classList.toggle('lit', on);
       }
@@ -129,7 +148,7 @@
     byDepth.forEach(function (nets, dep) {
       var run = function () {
         nets.forEach(function (nt) {
-          var l = L.els.get(String(nt)); if (!l) return;
+          var l = cell.els.get(String(nt)); if (!l) return;
           var o = !!v[nt];
           for (var i = 0; i < l.length; i++) l[i].classList.toggle('lit', o);
         });
@@ -137,10 +156,18 @@
       if (dep === 0) run(); else timers.push(setTimeout(run, dep * CFG.layerMs));
     });
   }
+  function paint(L, staggered) {
+    for (var i = 0; i < L.cells.length; i++) paintCell(L, L.cells[i], staggered);
+  }
   function updateHud() {
     if (!hud) return;
-    var L = stack[stack.length - 1]; if (!L) return;
-    var d = DESIGNS[L.di], r = RT[L.di];
+    var L = stack[stack.length - 1]; if (!L || !L.cells.length) return;
+    var center = L.off + innerWidth / 2, x = 0, cell = L.cells[0];
+    for (var i = 0; i < L.cells.length; i++) {
+      if (center >= x && center < x + L.cells[i].w) { cell = L.cells[i]; break; }
+      x += L.cells[i].w;
+    }
+    var d = DESIGNS[cell.di], r = RT[cell.di];
     hud.innerHTML = d.name + ' \u00b7 ' + d.gates + ' gates'
       + (d.dffs ? ' \u00b7 ' + d.dffs + ' flip-flops' : '')
       + ' \u00b7 cycle ' + r.cycle;
@@ -151,33 +178,26 @@
     stack.forEach(function (L) { paint(L, L.cfg.cls === 'fore' && !reduce); });
     updateHud();
   }
-  function rotate() {
-    base = (base + 1) % DESIGNS.length;
-    stack.forEach(function (L, i) {
-      setTimeout(function () {
-        L.el.style.opacity = '0';
-        setTimeout(function () {
-          L.di = (base + i) % DESIGNS.length;
-          buildStrip(L); paint(L, false);
-          L.el.style.opacity = L.cfg.opacity;
-          if (L.cfg.cls === 'fore') updateHud();
-        }, CFG.fadeMs);
-      }, i * 750);
-    });
-  }
   function frame(t) {
     if (hidden) return;
     var now = t / 1000, dt = last ? Math.min(now - last, 0.05) : 0;
     last = now; t0 += dt;
     for (var i = 0; i < stack.length; i++) {
       var L = stack[i];
-      L.off = (L.off + CFG.speed * L.cfg.speed * dt) % L.w;
+      L.off += CFG.speed * L.cfg.speed * dt;
+      // recycle any cell that has scrolled fully off the left edge onto the tail
+      while (L.cells.length > 1 && L.cells[0].w <= L.off) {
+        var gone = L.cells.shift();
+        L.strip.removeChild(gone.el);
+        L.off -= gone.w;
+      }
       L.strip.style.transform = 'translate(' + (-L.off) + 'px,' + layerY(L) + 'px)';
+      ensureFilled(L);
     }
     raf = requestAnimationFrame(frame);
   }
   function start() {
-    cancelAnimationFrame(raf); clearInterval(iv); clearInterval(rot); last = 0;
+    cancelAnimationFrame(raf); clearInterval(iv); last = 0;
     if (reduce) {
       stack.forEach(function (L) {
         L.strip.style.transform = 'translate(' + (-L.off) + 'px,' + layerY(L) + 'px)';
@@ -186,7 +206,6 @@
     }
     raf = requestAnimationFrame(frame);
     iv = setInterval(tick, CFG.tick);
-    rot = setInterval(rotate, CFG.rotateMs);
   }
   function build() {
     root.innerHTML = ''; stack = [];
@@ -202,8 +221,8 @@
       var strip = document.createElement('div');
       strip.className = 'cbg-strip';
       el.appendChild(strip); root.appendChild(el);
-      var L = { cfg: cfg, el: el, strip: strip, di: (base + i) % DESIGNS.length,
-                off: i * 370, els: new Map(), w: 1, h: 1 };
+      var L = { cfg: cfg, el: el, strip: strip, cells: [],
+                off: i * 370, nextDi: (base + i) % DESIGNS.length, h: 1 };
       buildStrip(L); stack.push(L);
     });
     t0 = 0; seedAll();
@@ -255,7 +274,7 @@
       build();
       document.addEventListener('visibilitychange', function () {
         hidden = document.hidden;
-        if (hidden) { cancelAnimationFrame(raf); clearInterval(iv); clearInterval(rot); timers.forEach(clearTimeout); }
+        if (hidden) { cancelAnimationFrame(raf); clearInterval(iv); timers.forEach(clearTimeout); }
         else start();
       });
       var rz;

@@ -1,1 +1,8 @@
 theme: jekyll-theme-cayman
+
+# The sgi-enhanced submodule is only a source for the SGI window PNGs
+# (already copied into assets/sgi/). It contains broken cursor symlinks
+# pointing to absolute paths that don't exist on GitHub Pages, which
+# crashes the Jekyll build, so keep it out of the build.
+exclude:
+  - sgi-enhanced

@@ -391,10 +391,10 @@ a, .nav a, .wb, .taskbar button, [role="button"] { cursor: var(--cur-hand), poin
 }
 
 /* ---- custom overlay bar (cross-browser, built by irix-scrollbar.js) ----
-   The bar is appended into the .frame (position:relative) and anchored over
-   the window-body's right edge, above the resize handles so the steppers stay
-   clickable. The frame's right border (--bd) sits outside it, and the bottom
-   corner grip peeks past on the left for resizing. */
+   The bar is appended into the scroll element's positioned parent and its
+   top/left/height are set by JS to overlay the element's inner right edge —
+   so it works for a window body inside a .frame and for a nested .fe-view
+   alike. z-index sits above the .rz resize handles so steppers stay clickable. */
 
 /* once attached, the native scrollbar is hidden in all engines */
 .irix-scroll.has-iscroll { scrollbar-width: none; }
@@ -402,10 +402,7 @@ a, .nav a, .wb, .taskbar button, [role="button"] { cursor: var(--cur-hand), poin
 
 .iscroll {
   position: absolute;
-  top: 0;
-  right: var(--bd, 8px);               /* just inside the frame's right border */
-  bottom: var(--bd, 8px);
-  width: 20px;
+  width: 20px;                         /* top/left/height set inline by JS */
   z-index: 6;                          /* above the .rz resize handles (z 5) */
   display: flex;
   flex-direction: column;
@@ -517,6 +514,78 @@ a, .nav a, .wb, .taskbar button, [role="button"] { cursor: var(--cur-hand), poin
 .desk-icon.is-selected img { filter: drop-shadow(0 0 0 #000) brightness(1.08); }
 .desk-icon:focus-visible { outline: none; }
 .desk-icon:focus-visible .desk-icon-label { border-color: #fff; }
+
+/* =====================================================================
+   file explorer (dirview-style) — location bar + recessed icon canvas
+   ===================================================================== */
+.window-body--explorer {
+  text-align: left;
+  padding: var(--bd, 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fe-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: #1a170e;
+}
+.fe-toolbar .fe-label { font-style: italic; font-weight: 700; }
+.fe-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 8px;
+  background: #cfc9ad;                 /* sunken location field */
+  color: #1a170e;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  border: 2px solid;
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fe-view {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 220px;
+  padding: 12px;
+  background: #9c977b;                 /* recessed icon canvas */
+  border: 2px solid;
+  border-top-color: #5b5746; border-left-color: #5b5746;
+  border-right-color: #dad7ca; border-bottom-color: #dad7ca;
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .25);
+  overflow: auto;
+}
+.fe-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 96px);
+  gap: 12px 4px;
+  align-content: start;
+}
+/* project entries reuse .desk-icon; recolour labels for the light canvas */
+.fe-view .desk-icon { width: 96px; }
+.fe-view .desk-icon .desk-icon-label {
+  color: #14120b;
+  text-shadow: none;
+}
+.fe-view .desk-icon:hover .desk-icon-label { color: #000; }
+/* empty-folder hint, hidden automatically once icons are added */
+.fe-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-size: 13px;
+  color: #4a4636;
+  pointer-events: none;
+}
+.fe-icons:not(:empty) ~ .fe-empty { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .window { transition: none !important; }

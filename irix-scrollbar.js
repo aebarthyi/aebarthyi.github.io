@@ -34,6 +34,16 @@
     const upBtn = bar.querySelector(".iscroll-up");
     const downBtn = bar.querySelector(".iscroll-down");
 
+    // overlay the bar precisely over the element's inner right edge, so this
+    // works whether el fills its parent (window body) or is nested (fe-view)
+    function layout() {
+      const hr = host.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      bar.style.top = (er.top - hr.top) + el.clientTop + "px";
+      bar.style.left = (er.left - hr.left) + el.clientLeft + el.clientWidth - 20 + "px";
+      bar.style.height = el.clientHeight + "px";
+    }
+
     function update() {
       const ch = el.clientHeight;
       const sh = el.scrollHeight;
@@ -41,6 +51,7 @@
       const overflow = sh - ch;
       if (overflow <= 1) { bar.hidden = true; return; }
       bar.hidden = false;
+      layout();
       const trackH = track.clientHeight;
       const thumbH = Math.max(24, Math.round(trackH * ch / sh));
       const maxThumb = trackH - thumbH;
@@ -109,6 +120,7 @@
     if (window.ResizeObserver) {
       const ro = new ResizeObserver(update);
       ro.observe(el);
+      ro.observe(host);
       if (el.firstElementChild) ro.observe(el.firstElementChild);
     }
     el.querySelectorAll("img").forEach((img) => {

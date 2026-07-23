@@ -58,6 +58,10 @@
         <img src="assets/icons/about.png" alt="">
         <span class="desk-icon-label">About</span>
       </button>
+      <button class="desk-icon" type="button" data-open="win-projects">
+        <img src="assets/icons/projects.png" alt="">
+        <span class="desk-icon-label">Projects</span>
+      </button>
       <button class="desk-icon" type="button" data-href="https://github.com/aebarthyi">
         <img src="assets/icons/github.png" alt="">
         <span class="desk-icon-label">GitHub</span>
@@ -104,11 +108,14 @@
         <div class="window-body window-body--doc irix-scroll" style="max-height: 70vh;">
           <h1>About Me</h1>
           <p>
-            I am a 5th year undergraduate computer engineering major at the
-            University of California, Santa Cruz. I enjoy playing the drums,
-            lifting weights, rock climbing, and snowboarding. My interests
-            include (but are not limited to) High-Performance Computing, ASIC
-            design, Computer Architecture, Compilers, Operating Systems, Digital
+            I am a Research Engineer at Tactical Computing Laboratories. I received my
+            Master's in Computer Science and Bachelor's in Computer Engineering at the
+            University of California, Santa Cruz. I enjoy playing the drums, lifting
+            weights, rock climbing, and snowboarding.
+          </p>
+          <p>
+            My interests include (but are not limited to) High-Performance Computing,
+            ASIC design, Computer Architecture, Compilers, Operating Systems, Digital
             Signal Processing, and Control Theory.
           </p>
 
@@ -129,18 +136,50 @@
           <h2>Academic Experience</h2>
           <ul>
             <li>Research Assistant @ UCSC under Dustin Richmond &mdash; October 2024 to Present</li>
-            <li>Team Captain of the UCSC not-so-slow-slugs HPC team &mdash; August 2024 to Present</li>
+            <li>Mentor of the UCSC not-so-slow-slugs HPC team &mdash; June 2025 to August 2026</li>
+            <li>Team Captain of the UCSC not-so-slow-slugs HPC team &mdash; August 2024 to June 2025</li>
+            <li>Team Member of the UCSC not-so-slow-slugs HPC team &mdash; September 2023 to August 2024</li>
             <li>Group Tutor for CSE120 &mdash; Computer Architecture &mdash; March 2024 to June 2024</li>
           </ul>
 
           <h2>Education</h2>
           <ul>
-            <li>BS in Computer Engineering @ UCSC &mdash; June 2025 (in progress)</li>
+            <li>BS in Computer Engineering @ UCSC &mdash; June 2025</li>
+            <li>MS in Computer Science &amp; Engineering @ UCSC &mdash; August 2026</li>
           </ul>
 
           <div class="logos">
             <img src="BE_Horizontal-Lockup_RGB_color.png" alt="Best Engineering lockup" loading="lazy">
             <img src="tc_logo_side_text_LARGE.png" alt="Tactical Computing Laboratories logo" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- projects window: an IRIX dirview-style file explorer -->
+    <section class="window window--explorer" id="win-projects" data-label="Projects" hidden>
+      <div class="titlebar">
+        <span class="cap capL"></span>
+        <button class="wb wb-menu" type="button" aria-label="Close"></button>
+        <span class="title">andrew@indigo:~/projects</span>
+        <button class="wb wb-iconify" type="button" aria-label="Minimize"></button>
+        <button class="wb wb-max" type="button" aria-label="Maximize"></button>
+        <span class="cap capR"></span>
+      </div>
+      <div class="frame">
+        <div class="window-body window-body--explorer">
+          <div class="fe-toolbar">
+            <span class="fe-label">Location:</span>
+            <span class="fe-path">/home/andrew/projects</span>
+          </div>
+          <div class="fe-view irix-scroll">
+            <!-- add project entries here; each is a .desk-icon with a data-href:
+                 <button class="desk-icon" type="button" data-href="https://…">
+                   <img src="assets/icons/…png" alt=""><span class="desk-icon-label">Name</span>
+                 </button>
+            -->
+            <div class="fe-icons"></div>
+            <div class="fe-empty">This folder is empty</div>
           </div>
         </div>
       </div>

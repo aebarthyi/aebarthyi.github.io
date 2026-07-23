@@ -1,0 +1,3 @@
+[submodule "sgi-enhanced"]
+	path = sgi-enhanced
+	url = https://github.com/jujum4n/sgi-enhanced.git

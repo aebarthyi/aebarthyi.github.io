@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="circuit-background.css">
 <style>
-  /* --- demo page content only; replace all of this with your portfolio --- */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
@@ -17,179 +16,172 @@
   }
   .cbg-content { height: 100%; display: grid; place-items: center; padding: 6vw; }
 
-  /* --- IRIX 4Dwm window --- */
+  /* =====================================================================
+     IRIX / SGI 4Dwm window — built from the real sgi-enhanced xfwm4 theme
+     assets (assets/sgi/*.png). Palette: base #a59f80, hi #dad7ca,
+     shadow #5b5746, black outline #000, text #000.
+     ===================================================================== */
   .window {
-    --frame: 9px;    /* frame thickness */
-    --grip: 30px;    /* distance from each corner to the notch */
+    --u: 1;                             /* integer pixel-scale of the chrome */
+    --base: #a59f80;
+    --bd:  calc(8px  * var(--u));       /* side / bottom border thickness    */
+    --th:  calc(32px * var(--u));       /* title-bar height: 8px top bevel + 24px face */
+    --face: calc(24px * var(--u));      /* control-button / title face height */
+    --cap: calc(8px  * var(--u));       /* title-bar end caps                */
+    --corner: calc(34px * var(--u));    /* bottom resize-grip corners        */
+    --notch-x: calc(32px * var(--u));   /* top-border notch distance from each corner */
     position: relative;
-    background: #8f958f;
-    padding: var(--frame);
-    outline: 1px solid #000;
-    box-shadow:
-      inset 2px 2px 0 #d7dcd7,     /* raised frame highlight (top-left) */
-      inset -2px -2px 0 #3c403c,   /* raised frame shadow (bottom-right) */
-      4px 6px 22px rgba(0, 0, 0, .55);
-    max-width: min(92vw, 640px);
+    width: min(92vw, 600px);
+    background: var(--base);
+    outline: calc(1px * var(--u)) solid #000;   /* crisp black window edge, all sides */
+    image-rendering: pixelated;
+    filter: drop-shadow(4px 6px 16px rgba(0, 0, 0, .55));
   }
-  /* 8 chiseled notches breaking the frame into corner grips + edge handles */
-  .window::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-repeat: no-repeat;
-    background-image:
-      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* top, near left  */
-      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* top, near right */
-      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* bottom, near left  */
-      linear-gradient(90deg, #3c403c 50%, #d7dcd7 50%),   /* bottom, near right */
-      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* left, near top    */
-      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* left, near bottom */
-      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%),  /* right, near top    */
-      linear-gradient(180deg, #3c403c 50%, #d7dcd7 50%);  /* right, near bottom */
-    background-size:
-      2px var(--frame), 2px var(--frame), 2px var(--frame), 2px var(--frame),
-      var(--frame) 2px, var(--frame) 2px, var(--frame) 2px, var(--frame) 2px;
-    background-position:
-      var(--grip) 0,               calc(100% - var(--grip)) 0,
-      var(--grip) 100%,            calc(100% - var(--grip)) 100%,
-      0 var(--grip),               0 calc(100% - var(--grip)),
-      100% var(--grip),            100% calc(100% - var(--grip));
-  }
-  /* inner bevel steps back down -> frame reads as a raised ridge/groove */
-  .window::after {
-    content: "";
-    position: absolute;
-    inset: calc(var(--frame) - 2px);
-    border: 2px solid;
-    border-top-color: #3c403c;
-    border-left-color: #3c403c;
-    border-right-color: #eef2f5;
-    border-bottom-color: #eef2f5;
-    pointer-events: none;
-  }
+  .window * { image-rendering: pixelated; }
+
+  /* ---- title bar: end caps + window controls over the tiled title fill ---- */
   .titlebar {
+    position: relative;
+    display: flex;
+    align-items: flex-end;              /* controls drop into the face, below the top bevel */
+    height: var(--th);
+    background: url("assets/sgi/title-3-active.png") repeat-x left top;
+    background-size: calc(4px * var(--u)) 100%;
+  }
+  /* two chiseled notches on the top border (shadow + highlight groove),
+     drawn in the top-bevel strip so they stay visible above the buttons.
+     --notch-x sets the distance from each corner. */
+  .titlebar::before,
+  .titlebar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: calc(4px * var(--u));                        /* title-2 native width */
+    height: calc(var(--th) - var(--face));              /* top-bevel strip (clears the buttons) */
+    background: url("assets/sgi/title-2-active.png") no-repeat left top;
+    background-size: calc(4px * var(--u)) var(--th);    /* full art, clipped to the bevel */
+    pointer-events: none;
+  }
+  .titlebar::before { left:  var(--notch-x); }
+  .titlebar::after  { right: var(--notch-x); transform: scaleX(-1); }   /* mirror of title-2 */
+  .titlebar .cap  { flex: 0 0 var(--cap); height: var(--th); background-repeat: no-repeat; background-size: 100% 100%; }
+  .titlebar .capL { background-image: url("assets/sgi/cap-l32.png"); }
+  .titlebar .capR { background-image: url("assets/sgi/cap-r32.png"); }
+
+  .wb {
+    flex: 0 0 auto;
+    height: var(--face);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+  .wb-menu  { width: calc(24px * var(--u)); background-image: url("assets/sgi/btn-menu.png"); }
+  .wb-hide  { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-hide.png"); }
+  .wb-max   { width: calc(25px * var(--u)); background-image: url("assets/sgi/btn-max.png"); }
+  .wb-close { width: calc(24px * var(--u)); background-image: url("assets/sgi/btn-close.png"); }
+  .wb-menu:active  { background-image: url("assets/sgi/btn-menu-p.png"); }
+  .wb-hide:active  { background-image: url("assets/sgi/btn-hide-p.png"); }
+  .wb-max:active   { background-image: url("assets/sgi/btn-max-p.png"); }
+  .wb-close:active { background-image: url("assets/sgi/btn-close-p.png"); }
+
+  .title {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--face);
     display: flex;
     align-items: center;
-    gap: .4rem;
-    padding: .35rem .4rem;
-    /* smooth Indigo Magic shading rather than a flat fill */
-    background: linear-gradient(180deg, #aab2b8 0%, #9aa2a8 45%, #868e94 100%);
-    border-style: solid;
-    border-width: 2px;
-    border-top-color: #eef2f5;
-    border-left-color: #eef2f5;
-    border-right-color: #40474d;
-    border-bottom-color: #40474d;
-  }
-  .titlebar .title {
-    flex: 1;
-    text-align: left;
-    padding-left: .3rem;
+    padding: 0 calc(6px * var(--u));
     font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;
+    font-style: italic;                 /* signature IRIX italic */
     font-weight: 700;
-    font-size: clamp(.72rem, 1.5vw, .9rem);
-    color: #0c0c0c;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .3);
+    font-size: calc(11px * var(--u));
+    color: #000;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* small beveled 4Dwm window-control buttons */
-  .win-btn {
-    width: 1.15rem;
-    height: 1.15rem;
-    flex: 0 0 auto;
-    background: linear-gradient(180deg, #b0b8be 0%, #9aa2a8 50%, #848c92 100%);
-    border-style: solid;
-    border-width: 2px;
-    border-top-color: #eef2f5;
-    border-left-color: #eef2f5;
-    border-right-color: #40474d;
-    border-bottom-color: #40474d;
-    outline: 1px solid #000;
+
+  /* ---- client frame: real left/right/bottom borders + resize-grip corners ---- */
+  .frame {
     position: relative;
+    padding: 0 var(--bd) var(--bd);
+    background-color: var(--base);
+    background-image:
+      url("assets/sgi/left-active.png"),
+      url("assets/sgi/right-active.png"),
+      url("assets/sgi/bottom-active.png");
+    background-repeat: repeat-y, repeat-y, repeat-x;
+    background-position: left top, right top, left bottom;
+    background-size: var(--bd) auto, var(--bd) auto, auto var(--bd);
   }
-  .win-btn::before {
+  .frame::before,
+  .frame::after {
     content: "";
     position: absolute;
-    background: #1c1c1c;
+    bottom: 0;
+    width: var(--corner);
+    height: var(--corner);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
   }
-  /* window-menu button: horizontal pulldown bar */
-  .win-menu::before   { inset: 42% 20% auto 20%; height: 3px; }
-  /* iconify: a distinctly small filled square, low-center */
-  .win-min::before    { width: 30%; height: 30%; inset: auto auto 26% 50%; transform: translateX(-50%); }
-  /* maximize: a large hollow square outline */
-  .win-max::before    { inset: 22% 22% 22% 22%; background: transparent; border: 2px solid #1c1c1c; }
+  .frame::before { left: 0;  background-image: url("assets/sgi/bottom-left-active.png"); }
+  .frame::after  { right: 0; background-image: url("assets/sgi/bottom-right-active.png"); }
 
+  /* ---- client area content ---- */
   .window-body {
-    padding: clamp(1.6rem, 5vw, 3rem) clamp(1.4rem, 5vw, 3rem) clamp(1.4rem, 4vw, 2.4rem);
+    padding: clamp(1.8rem, 6vw, 3.2rem) clamp(1.4rem, 5vw, 2.6rem) clamp(1.8rem, 5vw, 2.8rem);
     text-align: center;
+    background: var(--base);
+    image-rendering: auto;
   }
   .window-body h1 {
     font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;                 /* signature IRIX italic */
+    font-style: italic;
     font-weight: 700;
     font-size: clamp(1.8rem, 6vw, 3.4rem);
     letter-spacing: .01em;
-    color: #131513;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .35),
-                 0 -1px 0 rgba(0, 0, 0, .25);
+    color: #1a170e;
+    text-shadow: 0 1px 0 rgba(218, 215, 202, .7),
+                 0 -1px 0 rgba(0, 0, 0, .2);
   }
-  /* IRIX Indigo Magic beveled panel holding the buttons */
+
+  /* ---- SGI-styled navigation buttons ---- */
   .nav {
     margin-top: 1.8rem;
     display: inline-flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: .6rem;
-    padding: .7rem;
-    background: linear-gradient(180deg, #989e98 0%, #8f958f 55%, #7f857f 100%);
-    border-style: solid;
-    border-width: 2px;
-    border-top-color: #d7dcd7;
-    border-left-color: #d7dcd7;
-    border-right-color: #3c403c;
-    border-bottom-color: #3c403c;
-    outline: 1px solid #000;
+    gap: .55rem;
   }
   .nav a {
     display: inline-block;
     padding: .45rem 1.3rem;
     font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;                 /* signature IRIX italic labels */
+    font-style: italic;
     font-weight: 700;
     font-size: clamp(.72rem, 1.4vw, .88rem);
-    letter-spacing: .01em;
     text-decoration: none;
-    color: #0c0c0c;
-    /* SGI blue-gray scheme with a double (chiseled) raised bevel */
-    background: linear-gradient(180deg, #aeb6bc 0%, #9aa2a8 50%, #868e94 100%);
+    color: #000;
+    background: #a59f80;
     border-style: solid;
     border-width: 2px;
-    border-top-color: #eef2f5;
-    border-left-color: #eef2f5;
-    border-right-color: #40474d;
-    border-bottom-color: #40474d;
-    border-radius: 0;
+    border-top-color: #dad7ca;
+    border-left-color: #dad7ca;
+    border-right-color: #5b5746;
+    border-bottom-color: #5b5746;
     outline: 1px solid #000;
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .35),
-                inset -1px -1px 0 rgba(0, 0, 0, .35);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .3);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .28),
+                inset -1px -1px 0 rgba(0, 0, 0, .30);
   }
-  .nav a:hover {
-    background: linear-gradient(180deg, #bcc4ca 0%, #a8b0b6 50%, #949ca2 100%);
-  }
+  .nav a:hover { background: #b3ad8d; }
   .nav a:active {
-    /* sunken chiseled bevel when pressed */
-    background: linear-gradient(180deg, #7c848a 0%, #868e94 50%, #969ea4 100%);
-    border-top-color: #40474d;
-    border-left-color: #40474d;
-    border-right-color: #eef2f5;
-    border-bottom-color: #eef2f5;
-    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .35),
-                inset -1px -1px 0 rgba(255, 255, 255, .35);
+    background: #948e70;
+    border-top-color: #5b5746;
+    border-left-color: #5b5746;
+    border-right-color: #dad7ca;
+    border-bottom-color: #dad7ca;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .30),
+                inset -1px -1px 0 rgba(255, 255, 255, .28);
   }
 </style>
 </head>
@@ -197,24 +189,27 @@
 
   <!-- Background mounts itself here (or creates its own container). -->
 
-  <!-- Your content. The .cbg-content class just sets position:relative; z-index:1
-       so it sits above the background. -->
   <main class="cbg-content">
     <div class="window">
       <div class="titlebar">
-        <span class="win-btn win-menu"></span>
+        <span class="cap capL"></span>
+        <span class="wb wb-menu" aria-hidden="true"></span>
         <span class="title">andrew@indigo:~</span>
-        <span class="win-btn win-min"></span>
-        <span class="win-btn win-max"></span>
+        <span class="wb wb-hide" aria-hidden="true"></span>
+        <span class="wb wb-max" aria-hidden="true"></span>
+        <span class="wb wb-close" aria-hidden="true"></span>
+        <span class="cap capR"></span>
       </div>
-      <div class="window-body">
-        <h1>Andrew Barth-Yi</h1>
-        <nav class="nav">
-          <a href="/about">About</a>
-          <a href="https://github.com/aebarthyi" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.linkedin.com/in/andrew-barth-yi" target="_blank" rel="noopener">LinkedIn</a>
-          <a href="/blog">Blog</a>
-        </nav>
+      <div class="frame">
+        <div class="window-body">
+          <h1>Andrew Barth-Yi</h1>
+          <nav class="nav">
+            <a href="about.html">About</a>
+            <a href="https://github.com/aebarthyi" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://www.linkedin.com/in/andrew-barth-yi" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="/blog">Blog</a>
+          </nav>
+        </div>
       </div>
     </div>
   </main>

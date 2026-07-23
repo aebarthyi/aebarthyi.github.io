@@ -181,6 +181,47 @@
     box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .30),
                 inset -1px -1px 0 rgba(255, 255, 255, .28);
   }
+
+  /* ---- second window spawned onto the running desktop ---- */
+  .desktop-overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 6vw;
+    z-index: 10;
+  }
+  .desktop-overlay[hidden] { display: none; }
+  /* dim the backdrop just slightly so the new window reads as "on top",
+     without hiding the circuit animation underneath */
+  .desktop-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 4, 2, .35);
+    opacity: 0;
+    transition: opacity .28s ease;
+  }
+  .desktop-overlay.is-open::before { opacity: 1; }
+  /* the blog window animates its own transform, so no positioning transform here */
+  .window--blog { transform-origin: top left; will-change: transform, opacity; }
+
+  /* draggable chrome: don't let the titlebar select text or scroll on touch */
+  .titlebar { user-select: none; -webkit-user-select: none; touch-action: none; }
+  .window.dragging { user-select: none; }
+
+  .window-body p {
+    margin-top: 1rem;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: clamp(.85rem, 2vw, 1rem);
+    color: #2b2718;
+  }
+  /* close (menu) button acts as the window close control */
+  .wb-menu { cursor: pointer; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .desktop-overlay::before { transition: none; }
+  }
 </style>
 </head>
 <body>
@@ -211,6 +252,151 @@
     </div>
   </main>
 
+  <!-- Blog window: spawned onto the same desktop, no page reload. -->
+  <div class="desktop-overlay" id="blogOverlay" hidden>
+    <div class="window window--blog" id="blogWindow" role="dialog" aria-modal="true" aria-label="Blog">
+      <div class="titlebar">
+        <span class="cap capL"></span>
+        <span class="wb wb-menu" id="blogClose" role="button" tabindex="0" aria-label="Close window"></span>
+        <span class="title">andrew@indigo:~/blog</span>
+        <span class="wb wb-iconify" aria-hidden="true"></span>
+        <span class="wb wb-max" aria-hidden="true"></span>
+        <span class="cap capR"></span>
+      </div>
+      <div class="frame">
+        <div class="window-body">
+          <h1>Blog</h1>
+          <p>Under construction &mdash; posts coming soon.</p>
+          <nav class="nav">
+            <a href="#" data-close>&larr; Home</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="circuit-background.js" defer></script>
+  <script>
+  (function () {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---- draggable windows: translate offset from each window's laid-out spot ---- */
+    const offsets = new WeakMap();   // window el -> {x, y}
+    let zTop = 20;
+
+    function offsetOf(el) {
+      let o = offsets.get(el);
+      if (!o) { o = { x: 0, y: 0 }; offsets.set(el, o); }
+      return o;
+    }
+    function applyOffset(el) {
+      const o = offsetOf(el);
+      el.style.transform = (o.x || o.y) ? `translate(${o.x}px, ${o.y}px)` : "";
+    }
+    function raise(el) { el.style.zIndex = ++zTop; }
+
+    function makeDraggable(win, handle) {
+      handle.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest(".wb, [role='button'], a")) return;  // let controls click
+        const o = offsetOf(win);
+        const startX = e.clientX, startY = e.clientY;
+        const baseX = o.x, baseY = o.y;
+        raise(win);
+        win.classList.add("dragging");
+        handle.setPointerCapture(e.pointerId);
+
+        const move = (ev) => {
+          o.x = baseX + (ev.clientX - startX);
+          o.y = baseY + (ev.clientY - startY);
+          win.style.transform = `translate(${o.x}px, ${o.y}px)`;
+        };
+        const up = (ev) => {
+          win.classList.remove("dragging");
+          handle.releasePointerCapture(ev.pointerId);
+          handle.removeEventListener("pointermove", move);
+          handle.removeEventListener("pointerup", up);
+          handle.removeEventListener("pointercancel", up);
+        };
+        handle.addEventListener("pointermove", move);
+        handle.addEventListener("pointerup", up);
+        handle.addEventListener("pointercancel", up);
+      });
+    }
+
+    // main window
+    const mainWin = document.querySelector("main .window");
+    makeDraggable(mainWin, mainWin.querySelector(".titlebar"));
+    mainWin.addEventListener("pointerdown", () => raise(mainWin));
+
+    /* ---- blog window: opens from the button, draggable once open ---- */
+    const overlay  = document.getElementById("blogOverlay");
+    const win      = document.getElementById("blogWindow");
+    const trigger  = document.querySelector('.nav a[href="blog.html"]');
+    const closeBtn = document.getElementById("blogClose");
+    let originEl   = trigger;   // element the window grows from / collapses back to
+    let anim       = null;
+
+    makeDraggable(win, win.querySelector(".titlebar"));
+
+    function flipFrom(rect, opening) {
+      const last = win.getBoundingClientRect();            // current visual box (incl. any drag)
+      const o = offsetOf(win);
+      const baseX = o.x, baseY = o.y;                      // preserve dragged position at rest
+      const dx = rect.left - last.left + baseX;
+      const dy = rect.top  - last.top  + baseY;
+      const sx = Math.max(rect.width  / last.width,  0.001);
+      const sy = Math.max(rect.height / last.height, 0.001);
+      const rest      = { transform: (baseX || baseY) ? `translate(${baseX}px, ${baseY}px)` : "none", opacity: 1 };
+      const collapsed = { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0.15 };
+      if (anim) anim.cancel();
+      anim = win.animate(opening ? [collapsed, rest] : [rest, collapsed], {
+        duration: reduce ? 0 : 320,
+        easing: opening ? "cubic-bezier(.2,.8,.2,1)" : "cubic-bezier(.4,0,.7,.2)",
+        fill: "both",
+      });
+      return anim;
+    }
+
+    function open(fromEl) {
+      originEl = fromEl || trigger;
+      const o = offsetOf(win); o.x = 0; o.y = 0;           // fresh spawn, centered
+      win.style.transform = "";
+      overlay.hidden = false;
+      raise(overlay);
+      requestAnimationFrame(() => {
+        overlay.classList.add("is-open");
+        const a = flipFrom(originEl.getBoundingClientRect(), true);
+        a.finished.then(() => {                            // hand transform back to inline style for dragging
+          try { a.commitStyles(); } catch (_) {}
+          a.cancel();
+          applyOffset(win);
+          closeBtn.focus();
+        }).catch(() => {});
+      });
+    }
+
+    function close() {
+      if (overlay.hidden) return;
+      overlay.classList.remove("is-open");
+      const a = flipFrom(originEl.getBoundingClientRect(), false);
+      const done = () => { overlay.hidden = true; anim = null; win.style.transform = ""; trigger.focus(); };
+      a.finished.then(done).catch(done);
+    }
+
+    trigger.addEventListener("click", (e) => { e.preventDefault(); open(trigger); });
+    closeBtn.addEventListener("click", close);
+    closeBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); close(); }
+    });
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();                       // click the desktop
+      if (e.target.closest("[data-close]")) { e.preventDefault(); close(); }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+  })();
+  </script>
 </body>
 </html>

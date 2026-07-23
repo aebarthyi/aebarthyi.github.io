@@ -56,3 +56,18 @@
 
 /* Your page content must sit above the background. */
 .cbg-content { position: relative; z-index: 1; }
+
+/* =====================================================================
+   IRIX / SGI cursors (extracted from sgi-enhanced/cursor/sgi/*).
+   PNGs are 32x32; the numbers after each url() are the hotspot x/y.
+   A generic keyword fallback follows each in case the PNG is blocked.
+   ===================================================================== */
+html, body            { cursor: url("assets/cursors/arrow.png") 5 5, auto; }
+a, [role="button"],
+.nav a, .wb-menu      { cursor: url("assets/cursors/hand.png") 8 4, pointer; }
+.titlebar             { cursor: url("assets/cursors/move.png") 5 5, move; }
+.window.dragging,
+.window.dragging *    { cursor: url("assets/cursors/move.png") 5 5, move; }
+/* resize-grip corners of the window frame */
+.frame::after         { cursor: url("assets/cursors/nwse.png") 14 14, nwse-resize; }
+.frame::before        { cursor: url("assets/cursors/nesw.png") 5 14, nesw-resize; }
